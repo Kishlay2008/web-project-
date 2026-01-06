@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dynamic Number Guessing Game</title>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+        0% {background-position:0% 50%;}
+        50% {background-position:100% 50%;}
+        100% {background-position:0% 50%;}
+    }
+
+    .game-box {
+        background: rgba(255,255,255,0.95);
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+
+    h1 {
+        margin-bottom: 15px;
+    }
+
+    select, input {
+        width: 85%;
+        padding: 10px;
+        margin: 10px 0;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 8px 4px;
+        border: none;
+        border-radius: 8px;
+        background: #667eea;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #5a67d8;
+    }
+
+    .reset {
+        background: #e53e3e;
+    }
+
+    .info {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    .history {
+        font-size: 0.9rem;
+        margin-top: 8px;
+        color: #555;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- 🎵 Audio Files -->
+<audio id="bgMusic" loop>
+  <source src="https://files.catbox.moe/c23b00.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="winMusic">
+  <source src="https://files.catbox.moe/rgqdsl.mp3" type="audio/mpeg">
+</audio>
+
+<div class="game-box">
+    <h1>🎯 Guess The Number</h1>
+
+    <label>Select Difficulty</label><br>
+    <select id="level" onchange="startGame()">
+        <option value="50">Easy (1–50)</option>
+        <option value="100" selected>Medium (1–100)</option>
+        <option value="200">Hard (1–200)</option>
+    </select>
+
+    <p id="rangeText">Guess between 1 and 100</p>
+
+    <input type="number" id="guessInput" placeholder="Enter your guess">
+    <br>
+    <button onclick="checkGuess()">Submit Guess</button>
+
+    <p class="info" id="message"></p>
+    <p class="info">Attempts: <span id="attempts">0</span></p>
+
+    <div class="history">
+        Guess History: <span id="history">None</span>
+    </div>
+
+    <button class="reset" onclick="startGame()">Restart Game</button>
+
+    <!-- 🔊 Audio Control Buttons -->
+    <div style="margin-top:15px;">
+        <button onclick="toggleMusic()">🔊 Play / Pause Music</button>
+        <button onclick="muteMusic()">🔇 Mute</button>
+    </div>
+</div>
+
+<script>
+    let randomNumber;
+    let attempts;
+    let maxRange;
+    let guessHistory = [];
+
+    const bgMusic = document.getElementById("bgMusic");
+    const winMusic = document.getElementById("winMusic");
+    let isMuted = false;
+
+    function startGame() {
+        maxRange = document.getElementById("level").value;
+        randomNumber = Math.floor(Math.random() * maxRange) + 1;
+        attempts = 0;
+        guessHistory = [];
+
+        document.getElementById("attempts").textContent = attempts;
+        document.getElementById("history").textContent = "None";
+        document.getElementById("message").textContent = "";
+        document.getElementById("guessInput").value = "";
+        document.getElementById("guessInput").disabled = false;
+
+        document.getElementById("rangeText").textContent =
+            `Guess between 1 and ${maxRange}`;
+    }
+
+    function checkGuess() {
+        let guess = Number(document.getElementById("guessInput").value);
+        let msg = document.getElementById("message");
+
+        if (!guess) {
+            msg.style.color = "orange";
+            msg.textContent = "⚠️ Enter a valid number!";
+            return;
+        }
+
+        attempts++;
+        guessHistory.push(guess);
+
+        document.getElementById("attempts").textContent = attempts;
+        document.getElementById("history").textContent = guessHistory.join(", ");
+
+        if (guess < randomNumber) {
+            msg.style.color = "blue";
+            msg.textContent = "🔽 Too Low!";
+        }
+        else if (guess > randomNumber) {
+            msg.style.color = "purple";
+            msg.textContent = "🔼 Too High!";
+        }
+        else {
+            msg.style.color = "green";
+            msg.textContent = `🎉 Correct! You guessed it in ${attempts} attempts`;
+
+            bgMusic.pause();
+            winMusic.play();
+
+            document.getElementById("guessInput").disabled = true;
+        }
+
+        document.getElementById("guessInput").value = "";
+    }
+
+    function toggleMusic() {
+        if (bgMusic.paused) {
+            bgMusic.volume = 0.4;
+            bgMusic.play();
+        } else {
+            bgMusic.pause();
+        }
+    }
+
+    function muteMusic() {
+        isMuted = !isMuted;
+        bgMusic.muted = isMuted;
+        winMusic.muted = isMuted;
+    }
+
+    startGame();
+</script>
+
+</body>
+</html>
